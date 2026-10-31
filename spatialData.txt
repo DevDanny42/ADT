@@ -1,0 +1,69 @@
+CREATE DATABASE SpatialDB;
+
+USE SpatialDB;
+
+CREATE TABLE Restaurants (
+-> id INT PRIMARY KEY,
+-> name VARCHAR(50),
+-> location GEOMETRY NOT NULL
+-> );
+
+show tables;
+
+INSERT INTO Restaurants
+-> VALUES
+-> (1, 'Pizza Hut', ST_GeomFromText('POINT(10 20)'));
+
+select * from restaurants;
+
+INSERT INTO Restaurants
+VALUES
+(2, 'Dominos', ST_GeomFromText('POINT(15 25)'));
+
+select * from restaurants;
+
+SELECT id,
+name,
+ST_AsText(location)
+FROM Restaurants;
+
+SELECT
+name,
+ST_X(location) AS X,
+ST_Y(location) AS Y
+FROM Restaurants;
+
+SELECT ST_Distance(
+ST_GeomFromText('POINT(10 20)'),
+ST_GeomFromText('POINT(15 25)')
+) AS Distance;
+
+CREATE SPATIAL INDEX idx_location
+ON Restaurants(location);
+
+SELECT * FROM restaurants;
+
+CREATE TABLE Parks (
+id INT PRIMARY KEY,
+park_area GEOMETRY NOT NULL
+);
+
+
+SHOW TABLES;
+
+INSERT INTO Parks
+VALUES
+(1,ST_GeomFromText('POLYGON((0 0,20 0,20 20,0 20,0 0))'));
+
+SELECT * FROM parks;
+SELECT ST_AsText(park_area)
+FROM Parks;
+
+SELECT ST_Area(park_area)
+FROM Parks;
+
+SELECT ST_Within(
+ST_GeomFromText('POINT(10 20)'),park_area) AS InsidePark
+ FROM Parks;
+
+ SELECT ST_Contains(park_area,ST_GeomFromText('POINT(10 20)')) AS ContainsPoint FROM Parks;
