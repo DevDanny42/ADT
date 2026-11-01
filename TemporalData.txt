@@ -1,0 +1,61 @@
+create database employee;
+
+create table employ(
+id int primary key auto_increment,
+emp_id int not null,
+valid_from date not null,
+valid_to date default null,
+row_created timestamp default current_timestamp);
+
+alter table employ
+add column salary int;
+
+#Inserting Temporal Records — Salary History for an Employee
+
+INSERT INTO employ(emp_id, salary, valid_from, valid_to) VALUES
+ (101, 40000, '2022-01-01', '2022-12-31'),
+ (101, 45000, '2023-01-01', '2023-12-31'),
+(101, 50000, '2024-01-01', NULL);
+
+#Retrieving Full Salary History — SELECT *
+select emp_id,salary,valid_from,valid_to
+from employ
+where emp_id =101;
+
+#Point-in-Time Query — Salary as of a Specific Date
+select emp_id,salary,valid_from,valid_to from employ
+where emp_id=101 and '2022-01-03' BETWEEN valid_from AND valid_to;
+
+# 5. Retrieving the Current (Active) Record
+select emp_id,salary,valid_from from employ
+where valid_to =null;
+
+# Using a Trigger to Auto-Archive on Update (Transaction-Time Tracking)
+create table audit(
+id int primary key auto_increment,
+emp_id int,
+old_salary int,
+changed_on timestamp default current_timestamp);
+
+delimiter //
+create trigger audit_trigger
+before update on employ
+for each row 
+begin
+insert into audit(emp_id,old_salary)
+values(OLD.emp_id,OLD.salary);
+end // 
+delimiter ;
+
+select * from audit;
+
+update employ
+set salary=60000
+where valid_to is null;
+
+select * from employ;
+
+
+#Checking Interval Overlap Between Two Date Ranges
+select emp_id,salary,valid_from,valid_to from employ
+where emp_id = 101 and valid_from <='2023-03-01' and IFNULl(valid_to,'9999-12-31') >='2022-11-01';
